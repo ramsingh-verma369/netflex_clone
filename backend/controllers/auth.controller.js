@@ -60,7 +60,7 @@ export const signup = async (req, res) => {
 
     generateTokenAndCookie(newUser._id, res);
     await newUser.save();
-    
+
     res.status(201).json({
       success: true,
       user: {
@@ -77,11 +77,65 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  res.send("Login route");
+  try {
+    const {email,password} = req.body;
+    if(!email || !password){
+        res.status(400).json({
+            success: false,
+            message: "All fields are required"
+        })
+    };
+
+    const user = await User.findOne({email: email});
+    if(!user){
+        res.status(404).json({
+            success: true,
+            message: "Invalid credentials"
+        })
+    };
+
+    const isPasswordCorrect = await bcryptjs.compare(password,user.password);
+    if(!isPasswordCorrect){
+        res.status(400).json({
+            success: false,
+            message: "Invalid credentials"
+        });
+    };
+
+    generateTokenAndCookie(user._id,res);
+
+    res.status(200).json({
+        success: true,
+        user: {
+            ...user._doc,
+            password: ""
+        }
+    })
+
+  } catch (error) {
+    console.log("Error in login controller");
+    res.status(500).json({
+        success: false,
+        message: "Internal Server Error"
+    })
+    
+  }
 };
 
 export const logout = async (req, res) => {
-  res.send("Logout route");
+  try {
+    res.clearCookie("jwt-netflix");
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully"
+    })
+  } catch (error) {
+    console.log("Error in logout controller", error.message);
+    res.send(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };
 
 // export async function logout (req,res) {
