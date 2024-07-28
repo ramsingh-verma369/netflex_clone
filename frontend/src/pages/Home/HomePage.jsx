@@ -1,9 +1,11 @@
-import React from 'react'
+import HomeScreen from './HomeScreen';
+import AuthScreen from './AuthScreen';
 
 const HomePage = () => {
+  const user = false;
   return (
-    <div className='hero-bg h-screen'>
-      HomePage
+    <div>
+      {user ? <HomeScreen />:<AuthScreen />}
     </div>
   )
 }
